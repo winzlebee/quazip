@@ -164,50 +164,6 @@ void TestQuaZip::add()
     curDir.remove(zipName);
 }
 
-void TestQuaZip::setFileNameCodec_data()
-{
-    QTest::addColumn<QString>("zipName");
-    QTest::addColumn<QStringList>("fileNames");
-    QTest::addColumn<QByteArray>("encoding");
-    QTest::newRow("russian") << QString::fromUtf8("russian.zip") << (
-        QStringList() << QString::fromUtf8("тест.txt")) << QByteArray("IBM866");
-}
-
-void TestQuaZip::setFileNameCodec()
-{
-    QFETCH(QString, zipName);
-    QFETCH(QStringList, fileNames);
-    QFETCH(QByteArray, encoding);
-    fileNames.sort();
-    QDir curDir;
-    if (curDir.exists(zipName)) {
-        if (!curDir.remove(zipName))
-            QFAIL("Can't remove zip file");
-    }
-    if (!createTestFiles(fileNames)) {
-        QFAIL("Can't create test file");
-    }
-    if (!createTestArchive(zipName, fileNames,
-                           QTextCodec::codecForName(encoding))) {
-        QFAIL("Can't create test archive");
-    }
-    QuaZip testZip(zipName);
-    QVERIFY(testZip.open(QuaZip::mdUnzip));
-    QStringList fileList = testZip.getFileNameList();
-    fileList.sort();
-    QVERIFY(fileList[0] != fileNames[0]);
-    testZip.close();
-    testZip.setFileNameCodec(encoding);
-    QVERIFY(testZip.open(QuaZip::mdUnzip));
-    fileList = testZip.getFileNameList();
-    fileList.sort();
-    QCOMPARE(fileList, fileNames);
-    testZip.close();
-    // clean up
-    removeTestFiles(fileNames);
-    curDir.remove(zipName);
-}
-
 void TestQuaZip::setOsCode_data()
 {
     QTest::addColumn<QString>("zipName");
@@ -321,7 +277,7 @@ void TestQuaZip::testQIODeviceAPI()
         QFAIL("Can't create test archive");
     }
     QBuffer buffer;
-    if (!createTestArchive(&buffer, fileNames, NULL)) {
+    if (!createTestArchive(&buffer, fileNames)) {
         QFAIL("Can't create test archive");
     }
     QFile diskFile(zipName);
@@ -356,23 +312,6 @@ void TestQuaZip::setIoDevice()
     QVERIFY(!file.isOpen());
     QVERIFY(file.exists());
     QDir().remove(file.fileName());
-}
-
-void TestQuaZip::setCommentCodec()
-{
-    QuaZip zip("commentCodec.zip");
-    QVERIFY(zip.open(QuaZip::mdCreate));
-    zip.setCommentCodec("WINDOWS-1251");
-    zip.setComment(QString::fromUtf8("Вопрос"));
-    QuaZipFile zipFile(&zip);
-    QVERIFY(zipFile.open(QIODevice::WriteOnly, QuaZipNewInfo("test.txt")));
-    zipFile.close();
-    zip.close();
-    QVERIFY(zip.open(QuaZip::mdUnzip));
-    zip.setCommentCodec(QTextCodec::codecForName("KOI8-R"));
-    QCOMPARE(zip.getComment(), QString::fromUtf8("бНОПНЯ"));
-    zip.close();
-    QDir().remove(zip.getZipName());
 }
 
 void TestQuaZip::setAutoClose()

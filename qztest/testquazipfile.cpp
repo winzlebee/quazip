@@ -50,16 +50,13 @@ void TestQuaZipFile::zipUnzip_data()
             QStringList() << "test0.txt" << "testdir1/test1.txt"
             << "testdir2/test2.txt" << "testdir2/subdir/test2sub.txt")
         << QByteArray() << QByteArray() << false << false << -1;
-    QTest::newRow("Cyrillic") << "cyrillic.zip" << (
-            QStringList()
-            << QString::fromUtf8("русское имя файла с пробелами.txt"))
-        << QByteArray("IBM866") << QByteArray() << false << false << -1;
     QTest::newRow("Unicode") << "unicode.zip" << (
             QStringList()
             << QString::fromUtf8("Українське сало.txt")
             << QString::fromUtf8("Vin français.txt")
             << QString::fromUtf8("日本の寿司.txt")
-            << QString::fromUtf8("ქართული ხაჭაპური.txt"))
+            << QString::fromUtf8("ქართული ხაჭაპური.txt")
+            << QString::fromUtf8("русское имя файла с пробелами.txt"))
         << QByteArray("") << QByteArray() << false << true << -1;
     QTest::newRow("password") << "password.zip" << (
             QStringList() << "test.txt")
@@ -93,8 +90,6 @@ void TestQuaZipFile::zipUnzip()
     QuaZip testZip(&testFile);
     testZip.setZip64Enabled(zip64);
     testZip.setUtf8Enabled(utf8);
-    if (!fileNameCodec.isEmpty())
-        testZip.setFileNameCodec(fileNameCodec);
     QVERIFY(testZip.open(QuaZip::mdCreate));
     QString comment = utf8 ? "test テスト ჩეკი" : "Test comment";
     testZip.setComment(comment);
@@ -131,8 +126,6 @@ void TestQuaZipFile::zipUnzip()
     QCOMPARE(testZip.getZipError(), ZIP_OK);
     // now test unzip
     QuaZip testUnzip(&testFile);
-    if (!fileNameCodec.isEmpty())
-        testUnzip.setFileNameCodec(fileNameCodec);
     QVERIFY(testUnzip.open(QuaZip::mdUnzip));
     QCOMPARE(testUnzip.getComment(), comment);
     QVERIFY(testUnzip.goToFirstFile());

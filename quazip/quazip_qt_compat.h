@@ -12,14 +12,6 @@
 #include <QtCore/Qt>
 #include <QtCore/QtGlobal>
 
-// Legacy encodings are still everywhere, but the Qt team decided we
-// don't need them anymore and moved them out of Core in Qt 6.
-#if QT_VERSION >= QT_VERSION_CHECK(6, 0, 0)
-#  include <QtCore5Compat/QTextCodec>
-#else
-#  include <QtCore/QTextCodec>
-#endif
-
 // QSaveFile terribly breaks the is-a idiom (Liskov substitution principle):
 // QSaveFile is-a QIODevice, but it makes close() private and aborts
 // if you call it through the base class. Hence this ugly hack:

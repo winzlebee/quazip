@@ -85,12 +85,8 @@ bool createTestFiles(const QStringList &fileNames, int size, const QString &dir)
 
 bool createTestArchive(QuaZip &zip, const QString &zipName,
                        const QStringList &fileNames,
-                       QTextCodec *codec,
                        const QString &dir)
 {
-    if (codec != NULL) {
-        zip.setFileNameCodec(codec);
-    }
     if (!zip.open(QuaZip::mdCreate)) {
         qWarning("Couldn't open %s", zipName.toUtf8().constData());
         return false;
@@ -151,27 +147,19 @@ bool createTestArchive(QuaZip &zip, const QString &zipName,
     }
 }
 
-bool createTestArchive(const QString &zipName,
-                       const QStringList &fileNames,
-                       const QString &dir) {
-    return createTestArchive(zipName, fileNames, NULL, dir);
-}
-
 bool createTestArchive(QIODevice *ioDevice,
-                              const QStringList &fileNames,
-                              QTextCodec *codec,
-                              const QString &dir)
+                       const QStringList &fileNames,
+                       const QString &dir)
 {
     QuaZip zip(ioDevice);
-    return createTestArchive(zip, "<QIODevice pointer>", fileNames, codec, dir);
+    return createTestArchive(zip, "<QIODevice pointer>", fileNames, dir);
 }
 
 bool createTestArchive(const QString &zipName,
                               const QStringList &fileNames,
-                              QTextCodec *codec,
                               const QString &dir) {
     QuaZip zip(zipName);
-    return createTestArchive(zip, zipName, fileNames, codec, dir);
+    return createTestArchive(zip, zipName, fileNames, dir);
 }
 
 void removeTestFiles(const QStringList &fileNames, const QString &dir)

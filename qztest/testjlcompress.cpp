@@ -191,7 +191,6 @@ void TestJlCompress::extractFile()
     QFETCH(QStringList, fileNames);
     QFETCH(QString, fileToExtract);
     QFETCH(QString, destName);
-    QFETCH(QByteArray, encoding);
     QDir curDir;
     if (!curDir.mkpath("jlext/jlfile")) {
         QFAIL("Couldn't mkpath jlext/jlfile");
@@ -208,11 +207,9 @@ void TestJlCompress::extractFile()
     // thus leaving them at the default setting.
     srcPerm ^= QFile::WriteOther;
     QVERIFY(srcFile.setPermissions(srcPerm));
-    if (!createTestArchive(zipName, fileNames,
-                           QTextCodec::codecForName(encoding))) {
+    if (!createTestArchive(zipName, fileNames)) {
         QFAIL("Can't create test archive");
     }
-    QuaZip::setDefaultFileNameCodec(encoding);
     QVERIFY(!JlCompress::extractFile(zipName, fileToExtract,
                 "jlext/jlfile/" + destName).isEmpty());
     QFileInfo destInfo("jlext/jlfile/" + destName), srcInfo("tmp/" +
@@ -366,7 +363,6 @@ void TestJlCompress::extractDir()
     QFETCH(QStringList, fileNames);
     QFETCH(QStringList, expectedExtracted);
     QFETCH(QString, extDir);
-    QFETCH(QByteArray, fileNameCodecName);
     TemporarilyChangeToRoot changeToRoot;
     if (zipName == "tmp/quazip-root-test.zip") {
         changeToRoot.changeToRoot();
@@ -374,9 +370,6 @@ void TestJlCompress::extractDir()
             QFAIL("Couldn't change to /");
         }
     }
-    QTextCodec *fileNameCodec = NULL;
-    if (!fileNameCodecName.isEmpty())
-        fileNameCodec = QTextCodec::codecForName(fileNameCodecName);
     QDir curDir;
     if (!extDir.isEmpty() && !curDir.mkpath(extDir)) {
         QFAIL("Couldn't mkpath extDir");
@@ -384,14 +377,11 @@ void TestJlCompress::extractDir()
     if (!createTestFiles(fileNames)) {
         QFAIL("Couldn't create test files");
     }
-    if (!createTestArchive(zipName, fileNames, fileNameCodec)) {
+    if (!createTestArchive(zipName, fileNames)) {
         QFAIL("Couldn't create test archive");
     }
     QStringList extracted;
-    if (fileNameCodec == NULL)
-        extracted = JlCompress::extractDir(zipName, extDir);
-    else // test both overloads here
-        extracted = JlCompress::extractDir(zipName, fileNameCodec, extDir);
+    extracted = JlCompress::extractDir(zipName, extDir);
     QCOMPARE(extracted.count(), expectedExtracted.count());
     const QString dir = extDir;
     foreach (QString fileName, expectedExtracted) {
@@ -411,10 +401,7 @@ void TestJlCompress::extractDir()
     // now test the QIODevice* overload
     QFile zipFile(zipName);
     QVERIFY(zipFile.open(QIODevice::ReadOnly));
-    if (fileNameCodec == NULL)
-        extracted = JlCompress::extractDir(&zipFile, extDir);
-    else // test both overloads here
-        extracted = JlCompress::extractDir(&zipFile, fileNameCodec, extDir);
+    extracted = JlCompress::extractDir(&zipFile, extDir);
     QCOMPARE(extracted.count(), expectedExtracted.count());
     foreach (QString fileName, expectedExtracted) {
         QString fullName = dir + fileName;

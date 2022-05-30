@@ -38,15 +38,12 @@ private slots:
     void getFileList();
     void add_data();
     void add();
-    void setFileNameCodec_data();
-    void setFileNameCodec();
     void setOsCode_data();
     void setOsCode();
     void setDataDescriptorWritingEnabled();
     void testQIODeviceAPI();
     void setZipName();
     void setIoDevice();
-    void setCommentCodec();
     void setAutoClose();
 #ifdef QUAZIP_TEST_QSAVEFILE
     void saveFileBug();
